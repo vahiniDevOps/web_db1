@@ -1,0 +1,19 @@
+[webservers]
+
+ansiblemain ansible_host=192.168.198.138
+
+[dbservers]
+
+ansiblehost ansible_host=192.168.198.139
+
+[datacentre:children]
+
+webservers
+
+dbservers
+
+[datacentre:vars]
+
+ansible_user=root
+
+
