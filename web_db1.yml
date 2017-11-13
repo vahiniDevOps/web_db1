@@ -1,0 +1,48 @@
+---
+ - hosts: webservers
+   become: yes
+   gather_facts: no
+   tasks:
+      - name: Ensure Apache installed
+        yum: name=httpd state=present
+
+      - name: creates directory
+        file: path=/var/www/html/ansible state=directory
+      
+      - name: deploy bwebpage to path=/var/www/html/ansible
+        copy: src=index.html dest=/var/www/html/ansible/ mode=644
+
+      - name: Ensure Apache is running
+        service: name=httpd enabled=yes state=started
+      
+      - name: allow port 80/http access from anywhere
+        iptables:
+          action: insert
+          chain: INPUT
+          protocol: tcp
+          destination_port: 80
+          state: present
+          source: 0.0.0.0/0
+          jump: ACCEPT
+
+ - hosts: dbservers
+   become: yes
+   gather_facts: no
+   tasks:
+      - name: Install mysql repo
+        yum: name=http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm state=present
+
+      - name: Ensure mysql server installed
+        yum: name=mysql-server state=present
+
+      - name: Ensure mysql running
+        service: name=mysqld state=started
+
+      - name: Ensure MySQL-python is installed
+        yum: name=MySQL-python state=present
+
+      - name: Create Database
+        mysql_db: name=devops state=present
+    
+      - name: Create user named mint
+        mysql_user: name=mint password=12345 priv='*.*:ALL' state=present
